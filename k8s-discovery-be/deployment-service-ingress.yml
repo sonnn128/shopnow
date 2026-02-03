@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: shopnow-frontend
+  name: shopnow-frontend-deployment
+  namespace: microservice-shopnow
+spec:
+  replicas: 2
+  # Các version image đã từng apply
+  revisionHistoryLimit: 11
+  selector:
+    matchLabels:
+      app: shopnow-frontend
+      # deployment match service qua label app: shopnow-frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: shopnow-frontend
+      namespace: microservice-shopnow
+    spec:
+      containers:
+        - image: harbor.nobison.online/shopnow/frontend:v1
+          imagePullPolicy: Always
+          name: shopnow-frontend
+          ports:
+            - containerPort: 80
+              name: tcp
+              protocol: TCP
+      imagePullSecrets:
+        - name: harbor-registry-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopnow-frontend-service
+  namespace: microservice-shopnow
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: tcp
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: shopnow-frontend
+  sessionAffinity: None
+  type: ClusterIP
+
+--- 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopnow-frontend-ingress
+  namespace: microservice-shopnow
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: shopnow.nnson128.vn
+      http:
+        paths:
+          - backend:
+              service:
+                name: shopnow-frontend-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
