@@ -12,4 +12,5 @@ EXPOSE 8761
 
 ENV JAVA_OPTIONS="-Xmx2048m -Xms256m"
 # ENTRYPOINT ["java", "-jar", "/app/discovery-server-0.0.1-SNAPSHOT.war"] --spring.config.location=/app/src/main/resources/application.properties
-ENTRYPOINT exec java -jar /app/discovery-server-0.0.1-SNAPSHOT.war --spring.config.location=/app/src/main/resources/application.properties
+# ENTRYPOINT exec java -jar /app/discovery-server-0.0.1-SNAPSHOT.war --spring.config.location=/app/src/main/resources/application.properties
+ENTRYPOINT ["java", "-jar", "/app/discovery-server-0.0.1-SNAPSHOT.war"]

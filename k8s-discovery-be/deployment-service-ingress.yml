@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: shopnow-frontend
-  name: shopnow-frontend-deployment
+    app: shopnow-discovery-server
+  name: shopnow-discovery-server-deployment
   namespace: microservice-shopnow
 spec:
   replicas: 2
@@ -11,8 +11,8 @@ spec:
   revisionHistoryLimit: 11
   selector:
     matchLabels:
-      app: shopnow-frontend
-      # deployment match service qua label app: shopnow-frontend
+      app: shopnow-discovery-server
+      # deployment match service qua label app: shopnow-discovery-server
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -21,15 +21,15 @@ spec:
   template:
     metadata:
       labels:
-        app: shopnow-frontend
+        app: shopnow-discovery-server
       namespace: microservice-shopnow
     spec:
       containers:
-        - image: harbor.nobison.online/shopnow/frontend:v1
+        - image: harbor.nobison.online/shopnow/discovery-server:v1
           imagePullPolicy: Always
-          name: shopnow-frontend
+          name: shopnow-discovery-server
           ports:
-            - containerPort: 80
+            - containerPort: 8761
               name: tcp
               protocol: TCP
       imagePullSecrets:
@@ -38,7 +38,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: shopnow-frontend-service
+  name: shopnow-discovery-server-service
   namespace: microservice-shopnow
 spec:
   internalTrafficPolicy: Cluster
@@ -47,11 +47,11 @@ spec:
   ipFamilyPolicy: SingleStack
   ports:
     - name: tcp
-      port: 80
+      port: 8761
       protocol: TCP
-      targetPort: 80
+      targetPort: 8761
   selector:
-    app: shopnow-frontend
+    app: shopnow-discovery-server
   sessionAffinity: None
   type: ClusterIP
 
@@ -59,18 +59,18 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: shopnow-frontend-ingress
+  name: shopnow-discovery-server-ingress
   namespace: microservice-shopnow
 spec:
   ingressClassName: nginx
   rules:
-    - host: shopnow.nnson128.vn
+    - host: discovery-shopnow.nnson128.vn
       http:
         paths:
           - backend:
               service:
-                name: shopnow-frontend-service
+                name: shopnow-discovery-server-service
                 port:
-                  number: 80
+                  number: 8761
             path: /
             pathType: Prefix
